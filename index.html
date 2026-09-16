@@ -14,7 +14,7 @@
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // ==========================================
-        // KONFIGURASI FIREBASE SESUAI PROJECT ANDA
+        // KONFIGURASI FIREBASE ANDA
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyBLYfnnbEOr0PWEXLaumvo6Ggvss-HmAM",
@@ -29,7 +29,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Menghubungkan ke Alpine.js
         document.addEventListener('alpine:init', () => {
             Alpine.data('kasApp', () => ({
                 isAdmin: false,
@@ -46,7 +45,6 @@
                 search: '',
 
                 init() {
-                    // Mendengarkan perubahan data secara real-time dari Firebase
                     const kasRef = ref(db, 'transaksi_kas');
                     onValue(kasRef, (snapshot) => {
                         const data = snapshot.val();
@@ -174,25 +172,25 @@
 
     <!-- Header / Navbar -->
     <header class="bg-emerald-700 text-white shadow-sm no-print">
-        <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div class="text-center sm:text-left">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
                 <h1 class="text-lg font-bold">Transparansi Kas Operasional Pemilihan</h1>
                 <p class="text-emerald-100 text-xs">Laporan Keuangan Terbuka, Akuntabel, dan Real-Time</p>
             </div>
-            <div class="flex flex-wrap gap-2 items-center justify-center">
-                <button @click="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+            <div class="flex items-center gap-2">
+                <button @click="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
                     🖨️ Cetak / PDF
                 </button>
                 
                 <template x-if="!isAdmin">
-                    <button @click="bukaLogin()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
+                    <button @click="bukaLogin()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-3.5 py-2 rounded-lg text-xs font-semibold transition shadow-sm whitespace-nowrap">
                         🔒 Login Admin
                     </button>
                 </template>
                 <template x-if="isAdmin">
                     <div class="flex items-center gap-2">
-                        <span class="bg-emerald-800 text-emerald-200 text-[11px] px-2.5 py-1 rounded-md font-medium">Mode Admin</span>
-                        <button @click="isAdmin = false" class="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-md text-xs font-medium transition">
+                        <span class="bg-emerald-800 text-emerald-200 text-[11px] px-2.5 py-2 rounded-md font-medium">Mode Admin</span>
+                        <button @click="isAdmin = false" class="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-2 rounded-md text-xs font-medium transition">
                             Keluar
                         </button>
                     </div>
