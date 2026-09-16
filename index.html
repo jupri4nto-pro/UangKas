@@ -10,15 +10,16 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase JS App & Realtime Database (Compat Version - Bebas Error CORS File Local) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
-        /* KHUSUS SAAT DICETAK / PDF */
         @media print {
             .no-print { display: none !important; }
             body { background: white; font-size: 11pt; }
-            
-            /* Memaksa 3 kartu ringkasan tetap berjajar ke samping saat dicetak */
             .print-row {
                 display: flex !important;
                 flex-direction: row !important;
@@ -50,114 +51,96 @@
                     🖨️ Cetak / PDF
                 </button>
                 
-                <template x-if="!isAdmin">
-                    <button @click="bukaLogin()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
-                        🔒 Login Admin
-                    </button>
-                </template>
-                <template x-if="isAdmin">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-emerald-800 text-emerald-200 text-[11px] px-2.5 py-1 rounded-md font-medium">Mode Admin</span>
-                        <button @click="isAdmin = false" class="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-md text-xs font-medium transition">
-                            Keluar
-                        </button>
-                    </div>
-                </template>
+                <button @click="bukaLogin()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
+                    <span x-text="isAdmin ? '🔓 Keluar Admin' : '🔒 Login Admin'">🔒 Login Admin</span>
+                </button>
             </div>
         </div>
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-6 space-y-4">
 
-        <!-- KARTU RINGKASAN (Diberi class print-row dan print-card agar ikut rapi saat dicetak) -->
+        <!-- KARTU RINGKASAN -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 print-row">
-            <!-- Saldo -->
             <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between print-card">
                 <div>
                     <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Sisa Saldo Kas</p>
-                    <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5" x-text="formatRupiah(totalSaldo)"></h3>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5" x-text="formatRupiah(totalSaldo)">Rp 0</h3>
                 </div>
                 <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm font-bold no-print">💰</div>
             </div>
-            <!-- Pemasukan -->
             <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between print-card">
                 <div>
                     <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total Pemasukan</p>
-                    <h3 class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5" x-text="formatRupiah(totalPemasukan)"></h3>
+                    <h3 class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5" x-text="formatRupiah(totalPemasukan)">Rp 0</h3>
                 </div>
                 <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm no-print">📥</div>
             </div>
-            <!-- Pengeluaran -->
             <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between print-card">
                 <div>
                     <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total Pengeluaran</p>
-                    <h3 class="text-base sm:text-lg font-bold text-rose-600 mt-0.5" x-text="formatRupiah(totalPengeluaran)"></h3>
+                    <h3 class="text-base sm:text-lg font-bold text-rose-600 mt-0.5" x-text="formatRupiah(totalPengeluaran)">Rp 0</h3>
                 </div>
                 <div class="w-8 h-8 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-sm no-print">📤</div>
             </div>
         </div>
 
         <!-- Banner Info Publik -->
-        <template x-if="!isAdmin">
-            <div class="bg-amber-50 border-l-4 border-amber-400 px-3 py-2 rounded-r-lg no-print flex items-center gap-2">
-                <span class="text-sm">ℹ️</span>
-                <p class="text-[11px] text-amber-800 leading-relaxed">
-                    Anda berada di <b>Tampilan Publik</b>. Warga & Tim KPPS dapat memantau rincian keuangan secara transparan di bawah ini.
-                </p>
-            </div>
-        </template>
+        <div x-show="!isAdmin" class="bg-amber-50 border-l-4 border-amber-400 px-3 py-2 rounded-r-lg no-print flex items-center gap-2">
+            <span class="text-sm">ℹ️</span>
+            <p class="text-[11px] text-amber-800 leading-relaxed">
+                Anda berada di <b>Tampilan Publik</b> (Real-Time). Warga & Tim KPPS dapat memantau rincian keuangan secara transparan di bawah ini.
+            </p>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
-            <!-- Form Tambah Transaksi (Hanya Admin) -->
-            <template x-if="isAdmin">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 lg:col-span-1 no-print h-fit space-y-3">
-                    <div>
-                        <h2 class="text-xs font-bold text-slate-800 mb-1 pb-2 border-b uppercase tracking-wider">Tambah Transaksi Baru</h2>
-                        <form @submit.prevent="tambahTransaksi" class="space-y-2.5 mt-2.5">
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Jenis Transaksi</label>
-                                <select x-model="form.jenis" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                                    <option value="masuk">Pemasukan (Dana Masuk)</option>
-                                    <option value="keluar">Pengeluaran (Biaya)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Tanggal</label>
-                                <input type="date" x-model="form.tanggal" required class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Keterangan / Uraian</label>
-                                <input type="text" x-model="form.keterangan" placeholder="Contoh: Sumbangan Warga" required class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Kategori</label>
-                                <select x-model="form.kategori" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                                    <option value="Donasi / Kas Warga">Donasi / Kas Warga</option>
-                                    <option value="Konsumsi Rapat">Konsumsi Rapat</option>
-                                    <option value="Atribut & Banner">Atribut & Banner</option>
-                                    <option value="Logistik Pemilihan">Logistik Pemilihan</option>
-                                    <option value="Lain-lain">Lain-lain</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Nominal (Rp)</label>
-                                <input type="number" x-model.number="form.nominal" placeholder="Contoh: 150000" min="1" required class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            </div>
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs transition shadow-sm">
-                                Simpan Transaksi
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Zona Berbahaya / Reset -->
-                    <div class="pt-2 border-t">
-                        <button @click="resetData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-semibold py-1.5 rounded-lg text-[11px] transition">
-                            🗑️ Reset Semua Data Kas
+            <!-- Form Tambah Transaksi (Muncul Setelah Login) -->
+            <div x-show="isAdmin" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 lg:col-span-1 no-print h-fit space-y-3">
+                <div>
+                    <h2 class="text-xs font-bold text-slate-800 mb-1 pb-2 border-b uppercase tracking-wider">Tambah Transaksi Baru</h2>
+                    <form @submit.prevent="tambahTransaksi" class="space-y-2.5 mt-2.5">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Jenis Transaksi</label>
+                            <select x-model="form.jenis" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="masuk">Pemasukan (Dana Masuk)</option>
+                                <option value="keluar">Pengeluaran (Biaya)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Tanggal</label>
+                            <input type="date" x-model="form.tanggal" required class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Keterangan / Uraian</label>
+                            <input type="text" x-model="form.keterangan" placeholder="Contoh: Sumbangan Warga" required class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Kategori</label>
+                            <select x-model="form.kategori" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="Donasi / Kas Warga">Donasi / Kas Warga</option>
+                                <option value="Konsumsi Rapat">Konsumsi Rapat</option>
+                                <option value="Atribut & Banner">Atribut & Banner</option>
+                                <option value="Logistik Pemilihan">Logistik Pemilihan</option>
+                                <option value="Lain-lain">Lain-lain</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 uppercase mb-1">Nominal (Rp)</label>
+                            <input type="number" x-model.number="form.nominal" placeholder="Contoh: 150000" min="1" required class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs transition shadow-sm">
+                            Simpan Transaksi Online
                         </button>
-                    </div>
+                    </form>
                 </div>
-            </template>
+
+                <div class="pt-2 border-t">
+                    <button @click="resetData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-semibold py-1.5 rounded-lg text-[11px] transition">
+                        🗑️ Reset Semua Data Kas Online
+                    </button>
+                </div>
+            </div>
 
             <!-- Tabel Riwayat Transaksi -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3" :class="isAdmin ? 'lg:col-span-2' : 'lg:col-span-3'">
@@ -168,7 +151,6 @@
                     </div>
                 </div>
 
-                <!-- Print Header Info -->
                 <div class="hidden print:block mb-3">
                     <h3 class="text-base font-bold">Laporan Resmi Kas Operasional Pilkades</h3>
                     <p class="text-xs text-slate-600">Dicetak pada: <span x-text="new Date().toLocaleDateString('id-ID')"></span></p>
@@ -183,9 +165,7 @@
                                 <th class="p-2">Kategori</th>
                                 <th class="p-2 text-right">Masuk (Rp)</th>
                                 <th class="p-2 text-right">Keluar (Rp)</th>
-                                <template x-if="isAdmin">
-                                    <th class="p-2 text-center no-print rounded-r-lg">Aksi</th>
-                                </template>
+                                <th x-show="isAdmin" class="p-2 text-center no-print rounded-r-lg">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs">
@@ -198,11 +178,9 @@
                                     </td>
                                     <td class="p-2 text-right font-semibold text-emerald-600 whitespace-nowrap" x-text="item.jenis === 'masuk' ? formatRupiah(item.nominal) : '-'"></td>
                                     <td class="p-2 text-right font-semibold text-rose-600 whitespace-nowrap" x-text="item.jenis === 'keluar' ? formatRupiah(item.nominal) : '-'"></td>
-                                    <template x-if="isAdmin">
-                                        <td class="p-2 text-center no-print">
-                                            <button @click="hapusTransaksi(item.id)" class="text-rose-500 hover:text-rose-700 text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-50 transition">Hapus</button>
-                                        </td>
-                                    </template>
+                                    <td x-show="isAdmin" class="p-2 text-center no-print">
+                                        <button @click="hapusTransaksi(item.id)" class="text-rose-500 hover:text-rose-700 text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-50 transition">Hapus</button>
+                                    </td>
                                 </tr>
                             </template>
                             <template x-if="filteredTransaksi.length === 0">
@@ -218,22 +196,32 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="text-center py-4 text-[10px] text-slate-400 no-print">
         &copy; 2026 Panitia Pilkades / Warga. Transparan, Akuntabel, Terbuka untuk Publik.
     </footer>
 
-    <!-- Logika Alpine.js -->
+    <!-- Inisialisasi Firebase & Alpine -->
     <script>
+        // Konfigurasi Firebase Project Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyBLYfnnbEOr0PWEXLaumvo6Ggvss-HmAM",
+            authDomain: "aplikasi-kas-d319e.firebaseapp.com",
+            databaseURL: "https://aplikasi-kas-d319e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "aplikasi-kas-d319e",
+            storageBucket: "aplikasi-kas-d319e.appspot.com",
+            messagingSenderId: "460301358376",
+            appId: "1:460301358376:web:7709d6d65a9fd02e3c6c1d"
+        };
+
+        // Inisialisasi Firebase Compat
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         function kasApp() {
             return {
                 isAdmin: false,
-                urlPasswordGoogleSheet: '', 
                 defaultPassword: '12345',
-                
-                transaksi: JSON.parse(localStorage.getItem('kas_pilkades')) || [
-                    { id: 1, tanggal: '2026-09-16', keterangan: 'Donatur', kategori: 'Donasi / Kas Warga', jenis: 'masuk', nominal: 100000 },
-                ],
+                transaksi: [],
                 form: {
                     jenis: 'masuk',
                     tanggal: new Date().toISOString().split('T')[0],
@@ -243,26 +231,33 @@
                 },
                 search: '',
 
-                async getPasswordAdmin() {
-                    if (!this.urlPasswordGoogleSheet) return this.defaultPassword;
-                    try {
-                        let res = await fetch(this.urlPasswordGoogleSheet);
-                        let text = await res.text();
-                        let pw = text.split(/[\r\n]+/)[0].trim();
-                        return pw || this.defaultPassword;
-                    } catch (e) {
-                        return this.defaultPassword;
-                    }
+                init() {
+                    // Real-time listener dari Firebase
+                    db.ref('transaksi_kas').on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            this.transaksi = Object.keys(data).map(key => ({
+                                id: key,
+                                ...data[key]
+                            })).reverse();
+                        } else {
+                            this.transaksi = [];
+                        }
+                    });
                 },
 
-                async bukaLogin() {
+                bukaLogin() {
+                    if (this.isAdmin) {
+                        this.isAdmin = false;
+                        alert('Anda telah keluar dari Mode Admin.');
+                        return;
+                    }
                     let pwInput = prompt('Masukkan Password Admin:');
                     if (pwInput === null) return;
                     
-                    let actualPassword = await this.getPasswordAdmin();
-                    if (pwInput === actualPassword) {
+                    if (pwInput === this.defaultPassword) {
                         this.isAdmin = true;
-                        alert('Login Berhasil!');
+                        alert('Login Admin Berhasil! Form pengisian kas terbuka.');
                     } else {
                         alert('Password salah!');
                     }
@@ -288,44 +283,35 @@
                 },
 
                 tambahTransaksi() {
-                    const newId = this.transaksi.length > 0 ? Math.max(...this.transaksi.map(t => t.id)) + 1 : 1;
-                    this.transaksi.unshift({
-                        id: newId,
+                    db.ref('transaksi_kas').push({
                         jenis: this.form.jenis,
                         tanggal: this.form.tanggal,
                         keterangan: this.form.keterangan,
                         kategori: this.form.kategori,
                         nominal: Number(this.form.nominal)
+                    }).then(() => {
+                        this.form.keterangan = '';
+                        this.form.nominal = '';
                     });
-                    this.simpanData();
-                    this.form.keterangan = '';
-                    this.form.nominal = '';
                 },
 
                 hapusTransaksi(id) {
-                    if(confirm('Yakin ingin menghapus transaksi ini?')) {
-                        this.transaksi = this.transaksi.filter(t => t.id !== id);
-                        this.simpanData();
+                    if(confirm('Yakin ingin menghapus transaksi ini secara online?')) {
+                        db.ref(`transaksi_kas/${id}`).remove();
                     }
                 },
 
-                async resetData() {
-                    let pwInput = prompt('Konfirmasi Password Admin untuk mereset seluruh data:');
+                resetData() {
+                    let pwInput = prompt('Konfirmasi Password Admin untuk mereset seluruh data online:');
                     if (pwInput === null) return;
 
-                    let actualPassword = await this.getPasswordAdmin();
-                    if (pwInput === actualPassword) {
-                        if(confirm('PERHATIAN: Semua data transaksi akan dihapus permanen! Lanjutkan?')) {
-                            this.transaksi = [];
-                            this.simpanData();
+                    if (pwInput === this.defaultPassword) {
+                        if(confirm('PERHATIAN: Semua data kas online akan dihapus permanen! Lanjutkan?')) {
+                            db.ref('transaksi_kas').remove();
                         }
                     } else {
                         alert('Password salah! Reset dibatalkan.');
                     }
-                },
-
-                simpanData() {
-                    localStorage.setItem('kas_pilkades', JSON.stringify(this.transaksi));
                 },
 
                 formatRupiah(angka) {
